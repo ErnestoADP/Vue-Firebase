@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div id="main">
+
+        <form @submit.prevent="addUsuario">
+            <input v-model="nombre" id="nombre" type="text" placeholder="introduce tu nobre">
+            <input v-model="edad" id="edad" type="text" placeholder="introduce tu edad">
+
+            <input type="submit" value="Añadir Usuario">
+
+
+        </form>
+        <hr>
+        <h2>Listado de Usuarios</h2>
+        <ul>
+            <li v-for="usuario in usuarios">
+                {{usuario.data.nombre}} -- {{usuario.data.edad}}
+                <button @click="deleteUser(usuario.id)">Eliminar</button>
+                <button @click="updateUser(usuario.id)">Actualizar</button>
+
+            </li>
+        </ul>
+
+
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.4.3/firebase-app.js"></script>
+
+    <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
+    <script src="https://www.gstatic.com/firebasejs/8.4.3/firebase-analytics.js"></script>
+
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.4.3/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.4.3/firebase-firestore.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        var firebaseConfig = {
+            apiKey: "AIzaSyB3HKjk5nzL2rB4nqn2UCMjNl1G7a4B9Ac",
+            authDomain: "prueba-vue-b302f.firebaseapp.com",
+            projectId: "prueba-vue-b302f",
+            storageBucket: "prueba-vue-b302f.appspot.com",
+            messagingSenderId: "72564561931",
+            appId: "1:72564561931:web:9425e11635b80f5704cf0e",
+            measurementId: "G-L9F2261DF9"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        //  firebase.analytics();
+
+        const db = firebase.firestore()
+        const colection = db.collection('usuarios')
+
+
+        new Vue({
+            el: '#main',
+            data: {
+                nombre: null,
+                edad: null,
+                usuarios: [
+
+                ]
+            },
+            mounted() {
+                this.usuarios = []
+                colection.get()
+                    .then(r => {
+                        r.docs.map(item => {
+                            this.usuarios.push({
+                                id: item.id,
+                                data: item.data()
+                            })
+                        })
+                    })
+            },
+
+            methods: {
+                addUsuario() {
+                    colection.add({
+                        nombre: this.nombre,
+                        edad: this.edad,
+                    }).then(() => this.$mount())
+                },
+                deleteUser(id) {
+                    colection.doc(id).delete().then(() => this.$mount())
+                },
+                updateUser(id) {
+                    colection.doc(id).set({
+                        nombre: this.nombre,
+                        edad: this.edad
+                    }).then(() => this.$mount())
+                }
+            }
+
+
+
+        })
+    </script>
+
+</body>
+
+</html>
